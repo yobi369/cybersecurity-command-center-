@@ -17,7 +17,8 @@ The research direction below is provisional pending confirmation of the research
 - Deterministic local simulation service; no provider request is made by the current simulator.
 - Bounded input and validation for fictional asset labels.
 - The previous browser-side Gemini SDK integration has been removed.
-- GitHub Actions quality workflow for tests, TypeScript validation, and production build.
+- Seven deterministic unit tests covering simulation labelling, input bounds, supported topics, and disabled offensive commands.
+- GitHub Actions quality workflow; latest verified run passed unit tests, TypeScript validation, and production build.
 - Initial research, architecture, threat-model, validation, presentation, and security documentation.
 
 Not yet implemented: backend, real telemetry ingestion, event persistence, detection engine, authentication/RBAC, case management, audit trail, benchmark harness, and scientific evaluation.
@@ -47,7 +48,7 @@ This is a proposed direction, not a claim of novelty or demonstrated improvement
 
 Install dependencies with npm install. Run npm test, npm run typecheck, and npm run build.
 
-A committed dependency lockfile is still outstanding. The quality workflow must be green on the latest commit before its checks are considered verified.
+A committed dependency lockfile is still outstanding. CI success is tied to a specific commit and must be rechecked after subsequent code changes.
 
 ## Research integrity
 
