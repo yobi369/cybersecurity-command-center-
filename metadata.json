@@ -1,0 +1,6 @@
+{
+  "name": "Cybersecurity Command Center Simulator",
+  "description": "An educational tool that simulates a cybersecurity command-line interface. Use it to learn about security concepts by running simulated commands and receiving AI-generated, fictional outputs. This application does not perform any real network or hacking activities.",
+  "requestFramePermissions": [],
+  "majorCapabilities": []
+}
