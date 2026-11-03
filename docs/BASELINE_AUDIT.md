@@ -1,78 +1,89 @@
 # Baseline Repository Audit
 
-**Audit date:** 2026-11-03  
-**Repository:** `yobi369/cybersecurity-command-center-`  
-**Audited ref:** `main`  
-**Audited commit:** `2a58c72bebeef55e9eaafacdf4010e926ce89424`
+**Initial audit date:** 2026-11-03  
+**Initial audited ref:** main  
+**Initial audited commit:** 2a58c72bebeef55e9eaafacdf4010e926ce89424  
+**Follow-up implementation ref:** research/phd-foundation
 
 ## Executive finding
 
-The repository is an early educational terminal simulator, not yet a cybersecurity command center. The initial commit history contains an initial commit and one feature commit. The latest feature commit explicitly describes Gemini-generated fictional command output. The repository tree contains a small React/TypeScript/Vite application and no test, backend, persistence, telemetry, detection, or CI infrastructure.
+The initial repository was a small educational terminal simulator, not a cybersecurity command center. It contained a React/TypeScript/Vite frontend and a browser-side Gemini integration that generated fictional command output. It had no backend, telemetry pipeline, event store, detection engine, identity model, case workflow, audit trail, tests, lockfile, or CI workflow.
 
-This is a point-in-time code inspection. It is not a penetration test, runtime verification, dependency audit, or deployment assessment.
+A research-foundation branch has since been created. It adds project governance documentation, replaces provider-backed fictional output with deterministic local fixtures, removes the browser-side Gemini integration, adds input constraints, and introduces initial CI and unit tests. These changes improve prototype safety and reproducibility but do not create a functioning SOC.
 
-## Verified inventory
+## Initial verified inventory
 
-| Area | Observed state |
+| Area | Initial state on main |
 |---|---|
 | Frontend | React 19, TypeScript, Vite |
-| Main interface | `App.tsx`, terminal component and input component |
-| AI integration | Browser-side service imports `@google/genai` and calls Gemini |
-| Commands | `scan`, `analyze`, `crack`, `exploit`, `systeminfo`, `help`, `clear` |
-| Output semantics | Prompt requests fictional output; UI shows a simulator warning |
-| Backend | None found in repository tree |
-| Event ingestion | None found |
-| Detection engine | None found |
-| Persistence | None found |
-| Authentication / RBAC | None found |
-| Audit logging | None found |
+| Interface | Terminal component and command input |
+| AI integration | Browser-side service imported Google GenAI and called Gemini |
+| Commands | scan, analyze, crack, exploit, systeminfo, help, clear |
+| Backend / ingestion / persistence | Not present |
+| Detection engine | Not present |
+| Authentication / RBAC | Not present |
+| Audit / case management | Not present |
 | Automated tests | No test files or test script found |
-| CI | No workflow files found; GitHub Actions API returned zero workflow runs |
+| CI | No workflow files; zero workflow runs at initial audit |
 | Dependency lock | No lockfile found |
 | License | No license file found |
-| Operational documentation | No README or research/operations documentation found in initial tree |
 
-## High-priority findings
+## Initial findings and disposition
 
-### F-01: AI provider integration is in the frontend
-`services/geminiService.ts` constructs the Google GenAI client in code imported by the browser application. A browser-delivered application cannot safely hold a private provider API key. The service also reads `process.env.API_KEY`, while the repository is configured as a Vite application; the current environment handling is not a secure backend secret boundary and may fail at runtime/build depending on configuration.
+### F-01: Provider integration was in the frontend
 
-**Required action:** Remove provider credentials and provider SDK calls from browser code. Introduce a server-side adapter only if AI assistance remains necessary. Enforce authentication, request limits, input bounds, timeouts, output validation, and redaction before provider calls. Never commit secrets.
+The initial Gemini service constructed the Google GenAI client in code imported by the browser application and expected an environment API key.
 
-### F-02: AI-generated output is not security evidence
-The prompts explicitly ask the model to invent ports, services, vulnerabilities, hashes, and system information. Those outputs are suitable only for labelled demonstrations and must never be represented as observations or detections.
+**Disposition on research branch:** The browser-side provider service and dependency were removed from the active implementation. The current simulator uses deterministic local fixtures. If AI explanation is reintroduced, it must be through a secured server-side adapter with authentication, limits, redaction, timeouts, output validation, and server-side secrets. No claim is made that a provider key was exposed in a deployed build; deployment was not inspected.
 
-**Required action:** Use deterministic synthetic fixtures for reproducible demonstrations. Label provenance and simulation status in the data model and interface. Keep generated narratives separate from raw evidence and detection decisions.
+### F-02: Generated output was not security evidence
 
-### F-03: Command parsing is not robust
-The terminal lowercases the entire command line, splits on whitespace, and passes unvalidated arguments to prompt construction. This loses case information and does not provide structured argument validation or explicit target authorization.
+The original prompts instructed the model to invent ports, services, vulnerabilities, hashes, and system information.
 
-**Required action:** Replace free-form command dispatch with a typed command registry, strict schemas, bounded arguments, safe defaults, and explicit simulation/authorized-data modes.
+**Disposition on research branch:** Scan and system information commands now return fixed synthetic fixture output and explicitly state that no network or host was contacted. Credential cracking and exploit simulation commands were removed from the active command set.
 
-### F-04: Asynchronous terminal state can race
-The command handler closes over `history` and creates a new history snapshot before awaiting a provider response. Rapid command execution or future concurrency can cause stale-state behavior. The loading flag serializes current UI input but does not define cancellation, timeout, or request identity semantics.
+### F-03: Command parsing was unbounded
 
-**Required action:** Use functional state updates and an explicit command execution lifecycle with request IDs, deadlines, and cancellation behavior.
+The initial terminal lowercased and split free-form input before passing arguments to prompt construction.
 
-### F-05: Build and quality gates are incomplete
-The package scripts define development, build, and preview only. There is no test, lint, typecheck, or CI script. The HTML references `/index.css`, but that file was absent from the initial repository tree. Build success has not been established by this audit.
+**Disposition on research branch:** The input has a maximum length, blank submissions are ignored, and fictional asset labels are validated. This remains a small command interface, not a general command execution facility.
 
-**Required action:** Add an explicit stylesheet, lockfile, strict type checking, unit tests, build verification, and CI. Record actual command output.
+### F-04: Terminal state lifecycle needed improvement
 
-### F-06: No research evaluation exists
-No benchmark dataset, baseline, experimental design, metrics, ground-truth labeling protocol, statistical analysis, or reproducibility package was present.
+The initial handler used a history snapshot across an asynchronous provider request.
 
-**Required action:** Define research questions and hypotheses before reporting performance claims. Use public or properly authorized datasets, documented splits, fixed seeds where applicable, baseline comparisons, confidence intervals, and error analysis.
+**Disposition on research branch:** Functional history updates are used around asynchronous output. The interface serializes commands while a local demonstration response is being prepared.
 
-## Immediate priorities
+### F-05: Build and quality gates were incomplete
 
-1. Secure the AI boundary and eliminate invented output as a source of apparent detection.
-2. Establish a deterministic synthetic event and evidence model.
-3. Build a versioned detection pipeline with unit tests.
-4. Add event provenance, case management, and auditability.
-5. Define the research protocol and benchmark before tuning.
-6. Add CI, dependency controls, operational documentation, and reproducible demo data.
+The initial package had no typecheck, test, or CI scripts, and index.html referenced a stylesheet absent from the initial tree.
+
+**Disposition on research branch:** A stylesheet, typecheck script, Vitest runner, deterministic simulator tests, and GitHub Actions workflow were added. A dependency lockfile remains outstanding. The latest CI run must be checked before claiming all gates pass.
+
+### F-06: Research evaluation was absent
+
+No benchmark, experimental design, metrics, ground-truth protocol, or statistical analysis was present.
+
+**Disposition:** Research foundation and a proposed validation plan are documented. No experimental results or novelty claim are made.
+
+## Follow-up branch changes
+
+- Added README and research documentation covering baseline, research framing, architecture, threat model, validation, presentation, roadmap, and security policy.
+- Added deterministic local simulation service and unit tests for its safety and validation behavior.
+- Removed browser-side Gemini SDK service and dependency.
+- Added bounded input and local-only command semantics.
+- Added initial quality workflow for unit tests, typechecking, and production build.
+
+## Remaining high-priority gaps
+
+1. Commit and validate a dependency lockfile; pin CI actions to immutable commit SHAs.
+2. Verify the latest unit test, typecheck, and production build workflow.
+3. Replace CDN-based styling with locally built, versioned assets.
+4. Implement canonical event schema, ingestion adapter, deterministic rule engine, and evidence provenance.
+5. Implement authentication, authorization, case workflow, and audit trail before multi-user or sensitive-data use.
+6. Confirm research topic, literature gap, datasets, baseline, metrics, and ethics requirements.
+7. Verify deployment behavior from actual execution logs.
 
 ## Audit limitations
 
-This audit reviewed the repository tree and source files at the specified commit. It did not execute the application, install dependencies, inspect provider account settings, access a deployment, test a real environment, or verify any external security controls. All such items remain unverified.
+This was a source-tree and source-file inspection, not a penetration test, dependency vulnerability scan, runtime test, deployment inspection, or research evaluation. No production controls or external service settings were verified.
