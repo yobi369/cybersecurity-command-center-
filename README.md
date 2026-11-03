@@ -1,39 +1,36 @@
 # Cybersecurity Command Center
 
-**Research and engineering status:** Early-stage prototype. This repository is being developed into a reproducible, evidence-grounded cybersecurity operations research platform.
+**Status:** Early-stage research prototype; not production-ready.
 
-> **Safety boundary:** The current application is an educational simulator. It does not perform real network discovery, vulnerability scanning, exploitation, credential attacks, or incident response actions. Outputs must be identified as simulated unless they are derived from explicitly configured, authorized telemetry sources.
+> **Safety boundary:** The current application is a local educational simulator. It does not perform real network discovery, vulnerability scanning, exploitation, credential attacks, or incident response actions. Scan and system-information output is fixed synthetic fixture data.
 
 ## Project purpose
 
-The project aims to investigate how security operations teams can combine deterministic detection logic, structured evidence, and carefully constrained AI assistance to improve the triage and explanation of security events without sacrificing accuracy, traceability, or analyst control.
+The project is being developed to investigate how security operations teams can combine deterministic detection, structured evidence, and carefully constrained AI assistance to improve security-event triage while preserving accuracy, traceability, and analyst control.
 
-The research direction in this README is provisional until the research questions, target environment, and evaluation protocol are confirmed with the researcher.
+The research direction below is provisional pending confirmation of the researcher's approved PhD topic and a literature review establishing novelty.
 
-## Current implementation (repository audit: 2026-11-03)
+## Current implementation
 
 - React 19 + TypeScript + Vite frontend.
-- Terminal-style command interface.
-- Gemini-powered generation of fictional educational command output.
-- Commands currently include `scan`, `analyze`, `crack`, `exploit`, `systeminfo`, `help`, and `clear`.
-- No backend service, telemetry ingestion pipeline, persistent event store, detection engine, identity layer, role model, audit trail, benchmark harness, automated test suite, or CI workflow was present in the initial repository snapshot.
-- The initial UI is not evidence of a functioning SOC or real security monitoring system.
+- Terminal-style demonstration interface.
+- Deterministic local simulation service; no provider request is made by the current simulator.
+- Bounded input and validation for fictional asset labels.
+- The previous browser-side Gemini SDK integration has been removed.
+- GitHub Actions quality workflow for tests, TypeScript validation, and production build.
+- Initial research, architecture, threat-model, validation, presentation, and security documentation.
 
-See [docs/BASELINE_AUDIT.md](docs/BASELINE_AUDIT.md) for verified findings.
+Not yet implemented: backend, real telemetry ingestion, event persistence, detection engine, authentication/RBAC, case management, audit trail, benchmark harness, and scientific evaluation.
+
+See [docs/BASELINE_AUDIT.md](docs/BASELINE_AUDIT.md) for the initial code audit and subsequent changes.
 
 ## Proposed research direction
 
 **Working title:** Evidence-Grounded AI Assistance for Explainable and Reproducible Security-Event Triage.
 
-The proposed system separates:
-1. **Evidence collection** — ingest explicitly authorized, reproducible event records.
-2. **Deterministic detection** — evaluate versioned rules against normalized events.
-3. **Evidence management** — retain event provenance, timestamps, rule versions, and decision traces.
-4. **AI-assisted explanation** — summarize already-established evidence; AI does not invent telemetry or independently declare an incident.
-5. **Human decision-making** — analysts review, annotate, escalate, or close cases with auditable actions.
-6. **Evaluation** — compare the proposed workflow against defined baselines using reproducible datasets and predeclared metrics.
+The target architecture separates authorized event collection and provenance, deterministic versioned detection, evidence references and decision traces, optional AI explanation grounded in established evidence, human review, and reproducible evaluation against defined baselines.
 
-This is a research hypothesis and system direction, not a claim of demonstrated improvement.
+This is a proposed direction, not a claim of novelty or demonstrated improvement.
 
 ## Documentation
 
@@ -46,14 +43,16 @@ This is a research hypothesis and system direction, not a claim of demonstrated 
 - [Engineering roadmap](docs/ROADMAP.md)
 - [Security policy](SECURITY.md)
 
-## Safety and responsible use
+## Development
 
-Only use real telemetry from systems for which you have explicit authorization. Keep demonstrations synthetic by default. Do not place secrets, personal data, live credentials, or sensitive production logs in this repository or public issue reports. See [SECURITY.md](SECURITY.md).
+Install dependencies with npm install. Run npm test, npm run typecheck, and npm run build.
 
-## Development status
+A committed dependency lockfile is still outstanding. The quality workflow must be green on the latest commit before its checks are considered verified.
 
-This repository is at the research-prototype stage. Production readiness, detection effectiveness, dataset validity, performance, and research novelty have not yet been established. Progress will be reported through tests, reproducible experiments, documented limitations, and traceable commits—not unsupported feature claims.
+## Research integrity
+
+Do not report synthetic outputs as observations, proposed architecture as implemented functionality, or unrun experiments as results. Document dataset provenance, licensing, preprocessing, splits, baselines, metrics, uncertainty, and limitations. Human-subject studies require applicable institutional ethics approval.
 
 ## License
 
-No license was present in the initial repository snapshot. The project owner should select and add an explicit license before external reuse or distribution.
+No license is currently declared. An explicit license should be selected before external reuse or distribution.
