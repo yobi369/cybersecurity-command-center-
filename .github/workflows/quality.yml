@@ -16,7 +16,7 @@ concurrency:
 
 jobs:
   quality:
-    name: Typecheck and production build
+    name: Test, typecheck and production build
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
@@ -28,6 +28,8 @@ jobs:
           node-version: 22
       - name: Install dependencies
         run: npm install --no-audit --no-fund
+      - name: Unit tests
+        run: npm test
       - name: TypeScript validation
         run: npm run typecheck
       - name: Production build
