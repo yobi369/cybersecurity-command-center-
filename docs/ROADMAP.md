@@ -10,12 +10,14 @@ This roadmap is gated by evidence. A milestone is complete only when its accepta
 - [ ] Literature review establishes novelty and related-work comparison.
 
 ## M1 — Secure frontend foundation
-- [ ] Remove browser-side provider secrets and SDK calls.
-- [ ] Replace generated fictional security observations with deterministic, labelled fixtures.
-- [ ] Add robust typed command/event schemas and validation.
-- [ ] Add explicit styles and remove reliance on runtime CDN styling.
-- [ ] Add lockfile, strict typecheck, lint, and unit test scripts.
-- [ ] Add CI and dependency/security checks.
+- [x] Remove browser-side provider secrets and SDK calls from the active application.
+- [x] Replace generated fictional security observations with deterministic, labelled fixtures.
+- [x] Add bounded input validation for the current fictional asset label.
+- [ ] Replace runtime CDN styling with locally built, versioned assets.
+- [ ] Add and validate a committed dependency lockfile.
+- [ ] Enable strict TypeScript checking and linting.
+- [x] Add initial deterministic unit tests and a CI workflow.
+- [ ] Verify the latest complete CI run and pin workflow actions to immutable commit SHAs.
 
 ## M2 — Evidence and detection core
 - [ ] Define versioned canonical event schema.
