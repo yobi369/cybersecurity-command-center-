@@ -16,8 +16,9 @@ This roadmap is gated by evidence. A milestone is complete only when its accepta
 - [ ] Replace runtime CDN styling with locally built, versioned assets.
 - [ ] Add and validate a committed dependency lockfile.
 - [ ] Enable strict TypeScript checking and linting.
-- [x] Add initial deterministic unit tests and a CI workflow.
-- [ ] Verify the latest complete CI run and pin workflow actions to immutable commit SHAs.
+- [x] Add deterministic unit tests and a CI workflow.
+- [x] Verify unit tests, TypeScript validation, and production build on commit 7aa34b2c9f956cbd0bf2b95a40fb9a8a432c3a9e.
+- [ ] Pin workflow actions to immutable commit SHAs and add dependency/security scanning.
 
 ## M2 — Evidence and detection core
 - [ ] Define versioned canonical event schema.
