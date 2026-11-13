@@ -1,3 +1,4 @@
+import { normalizeIsoTimestamp } from './time';
 /**
  * Strict parser for the current research fixture event contract.
  * This is not an ingestion endpoint or production source-authentication mechanism.
@@ -18,7 +19,6 @@ export interface CanonicalSecurityEvent {
 }
 const ID_PATTERN = /^[a-zA-Z0-9][a-zA-Z0-9._:-]{0,79}$/;
 const ATTRIBUTE_KEY_PATTERN = /^[a-zA-Z][a-zA-Z0-9_.-]{0,63}$/;
-const ISO_WITH_TIMEZONE = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d{1,3})?(?:Z|[+-]\d{2}:\d{2})$/;
 const ALLOWED_FIELDS = new Set(['eventId','observedAt','receivedAt','sourceId','sourceType','schemaVersion','eventType','simulation','attributes']);
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === 'object' && value !== null && !Array.isArray(value);
