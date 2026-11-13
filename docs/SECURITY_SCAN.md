@@ -35,7 +35,7 @@ A clean npm audit or CodeQL run is limited evidence for the exact scanned commit
 
 ## Latest verified scan evidence
 
-- Quality Gates run `43396218687` passed on commit `79bb648718f6b2855bc1631622f10d66319d5a0c`, including npm audit, OpenAPI lint, CycloneDX SBOM, 55 unit tests, strict TypeScript, build and coverage thresholds.
-- CodeQL run `43396218616` completed successfully on the same commit. Review and disposition of any resulting alerts remains required.
-- Gitleaks full-history scan run `43396218689` completed successfully on the same commit.
+- Quality Gates run `43396720137` passed on commit `db2f74c30db04d8d5b1873f1955068ed5c83b96f`, including npm audit, OpenAPI lint, CycloneDX SBOM, 62 unit tests, strict TypeScript, build and coverage thresholds.
+- CodeQL run `43396720311` was still in progress on the same commit at the time of this record update. Review and disposition of any resulting alerts remains required.
+- Gitleaks full-history scan run `43396720227` completed successfully on the same commit.
 - CodeQL success means analysis completed and results were submitted; it does not mean there are no alerts. Review and disposition of findings in GitHub Security remains required. Gitleaks success is scoped to the scanned history and version; continue scanning every change.
