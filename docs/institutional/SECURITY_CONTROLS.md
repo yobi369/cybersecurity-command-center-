@@ -24,7 +24,7 @@
 | SEC-018 | Separate dev/test/staging/prod | Environment review | Not implemented |
 | SEC-019 | Periodic privileged-access review | Access review records | Not implemented |
 | SEC-020 | Independent security assessment | Signed report and remediation | Not performed |
-| SEC-021 | Scan repository history for exposed secrets | Gitleaks full-history workflow | Implemented in CI; full-history scan passed on commit 79bb648718f6b2855bc1631622f10d66319d5a0c; findings must be triaged and any exposed credential rotated |
+| SEC-021 | Scan repository history for exposed secrets | Gitleaks full-history workflow | Implemented in CI; full-history scan passed on commit db2f74c30db04d8d5b1873f1955068ed5c83b96f; findings must be triaged and any exposed credential rotated |
 
 ## Secure engineering rules
 Never commit credentials, certificates, tokens, private keys or real incident data. Treat telemetry as hostile. Never render raw fields as trusted HTML or execute supplied shell/script content. Keep AI provider credentials server-side. AI must not alter detections, permissions, disposition or response actions. Apply least privilege to users, database roles, CI and service identities. Keep secrets and unnecessary personal data out of logs. Review dependencies for vulnerabilities, license, maintenance and necessity.
