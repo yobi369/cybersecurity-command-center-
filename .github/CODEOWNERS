@@ -1,0 +1,8 @@
+# Default ownership. Institutional deployments must add receiving-organization reviewers.
+* @yobi369
+
+# Security-sensitive changes require maintainer review.
+/SECURITY.md @yobi369
+/.github/workflows/ @yobi369
+/services/ @yobi369
+/database/ @yobi369
