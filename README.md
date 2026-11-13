@@ -19,7 +19,7 @@ The research direction below is provisional pending confirmation of the research
 - The previous browser-side Gemini SDK integration has been removed.
 - Seven deterministic simulator tests covering simulation labelling, input bounds, supported topics, and disabled offensive commands.
 - Eleven event-engine tests covering thresholds, rolling windows, source separation, evidence references, duplicate rejection, malformed identifiers, timezone validation, batch limits, and synthetic-only enforcement.
-- Ten canonical event-schema tests, six end-to-end in-memory pipeline tests, twelve case-management tests and nine synthetic benchmark tests (55 automated tests in total).
+- Ten canonical event-schema tests, six end-to-end in-memory pipeline tests, twelve case-management tests and nine synthetic benchmark tests and seven strict timestamp tests (62 automated tests in total).
 - An isolated deterministic authentication-failure burst detector with rule versioning and evidence event IDs.
 - A strict synthetic-only canonical event parser (schema v1.0.0) with UTC normalization, unknown-field rejection and bounded scalar attributes, integrated with the deterministic detector through an in-memory processing pipeline.
 - A reproducible synthetic benchmark harness reporting TP/FP/TN/FN, precision, recall, F1 and accuracy, with strict scenario/event bounds and explicit limitations.
