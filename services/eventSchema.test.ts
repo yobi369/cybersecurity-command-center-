@@ -30,6 +30,7 @@ describe('canonical event schema v1.0.0', () => {
   it('requires explicit timezone and valid timestamps', () => {
     expect(() => parseCanonicalEvent({ ...valid(), observedAt: '2026-01-01T00:00:00' })).toThrow('explicit timezone');
     expect(() => parseCanonicalEvent({ ...valid(), receivedAt: 'not-a-date' })).toThrow('explicit timezone');
+    expect(() => parseCanonicalEvent({ ...valid(), observedAt: '2026-02-31T00:00:00Z' })).toThrow('valid ISO-8601');
   });
   it('rejects malformed identifiers', () => {
     expect(() => parseCanonicalEvent({ ...valid(), eventId: undefined })).toThrow('eventId');
