@@ -1,10 +1,10 @@
+import { normalizeIsoTimestamp } from './time';
+
 /** Deterministic, fixture-first event triage core. No network or response actions. */
 export type SecurityEventType = 'authentication.failure' | 'authentication.success';
 export interface SecurityEvent { eventId: string; observedAt: string; sourceId: string; eventType: SecurityEventType; simulation: true; attributes?: Readonly<Record<string, string | number | boolean>>; }
 export interface DetectionFinding { findingId: string; detectorId: 'auth-failure-burst'; ruleVersion: typeof DETECTION_RULE_SET_VERSION; severity: 'high'; title: string; summary: string; sourceId: string; firstObservedAt: string; lastObservedAt: string; evidenceEventIds: string[]; simulation: true; }
 export interface DetectionResult { findings: DetectionFinding[]; evaluatedEventCount: number; ignoredEventCount: number; ruleSetVersion: typeof DETECTION_RULE_SET_VERSION; }
-import { normalizeIsoTimestamp } from './time';
-
 export const DETECTION_RULE_SET_VERSION = '1.0.0' as const;
 const FAILURE_THRESHOLD = 5;
 const WINDOW_MS = 10 * 60 * 1000;
