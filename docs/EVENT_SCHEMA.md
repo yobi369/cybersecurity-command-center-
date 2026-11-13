@@ -26,7 +26,7 @@ Unknown root fields are rejected. Nested attribute values, nulls, arrays, non-fi
 
 ## Trust and production limitations
 
-The parser validates shape and basic semantics; it does not authenticate a source. A payload flag is not proof of provenance. Production ingestion must bind source identity to authenticated transport/credentials and server-controlled metadata, enforce payload byte limits before parsing, apply schema compatibility policy, preserve raw evidence safely, and record receipt metadata. This parser deliberately rejects non-synthetic sources and is not an operational telemetry ingestion contract.
+Timestamp parsing uses a shared calendar-aware ISO-8601 validator that rejects impossible month/day combinations, invalid leap days, out-of-range clock components and invalid timezone offsets before UTC normalization. The parser validates shape and basic semantics; it does not authenticate a source. A payload flag is not proof of provenance. Production ingestion must bind source identity to authenticated transport/credentials and server-controlled metadata, enforce payload byte limits before parsing, apply schema compatibility policy, preserve raw evidence safely, and record receipt metadata. This parser deliberately rejects non-synthetic sources and is not an operational telemetry ingestion contract.
 
 ## Change policy
 
