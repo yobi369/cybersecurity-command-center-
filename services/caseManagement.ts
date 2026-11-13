@@ -1,3 +1,5 @@
+import { normalizeIsoTimestamp } from './time';
+
 export type CaseStatus = 'new' | 'triaged' | 'in_progress' | 'escalated' | 'pending_information' | 'resolved' | 'closed';
 export type CaseRole = 'analyst' | 'supervisor' | 'auditor';
 
@@ -73,7 +75,7 @@ const ALLOWED_REASON_CODES: Record<string, readonly string[]> = {
 };
 
 function validTime(value: string): boolean {
-  return ISO_WITH_TIMEZONE.test(value) && Number.isFinite(Date.parse(value));
+  return normalizeIsoTimestamp(value) !== null;
 }
 
 /**
