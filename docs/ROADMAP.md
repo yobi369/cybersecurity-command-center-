@@ -19,7 +19,7 @@ This roadmap is gated by evidence. A milestone is complete only when its accepta
 - [ ] Add linting and formatting gates.
 - [x] Add deterministic unit tests, V8 coverage reporting, regression thresholds and a CI workflow.
 - [x] Preserve coverage reports as CI artifacts.
-- [x] Verify frozen install, dependency audit, OpenAPI lint, CycloneDX SBOM, 55 tests, coverage thresholds, strict TypeScript and production build on commit 79bb648718f6b2855bc1631622f10d66319d5a0c.
+- [x] Verify frozen install, dependency audit, OpenAPI lint, CycloneDX SBOM, 62 tests, coverage thresholds, strict TypeScript and production build on commit db2f74c30db04d8d5b1873f1955068ed5c83b96f.
 - [x] Pin workflow actions to immutable commit SHAs and add npm dependency audit to CI.
 - [x] Add CodeQL static analysis and Gitleaks full-history secret scanning workflows; alert triage and GitHub-native secret scanning/push protection remain outstanding.
 - [x] Generate CycloneDX SBOM and retain it with CI coverage evidence.
