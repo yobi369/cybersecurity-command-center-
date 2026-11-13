@@ -11,7 +11,8 @@
 | Processing pipeline | services/eventPipeline.test.ts | 6 | Parser-to-detector integration |
 | Case management | services/caseManagement.test.ts | 12 | Pure lifecycle and role-aware transition policy |
 | Benchmark harness | services/benchmark.test.ts | 9 | Versioned synthetic scenarios, scoring and metric bounds |
-| Strict timestamp validation | services/time.test.ts | 7 | Calendar-aware ISO-8601 and timezone validation |\n| Total | Current repository | 62 | Automated unit tests only |
+| Strict timestamp validation | services/time.test.ts | 7 | Calendar-aware ISO-8601 and timezone validation |
+| Total | Current repository | 62 | Automated unit tests only |
 
 ## Required cases
 | ID | Scenario | Expected result | Status |
@@ -50,7 +51,10 @@
 | TC-056 | Duplicate benchmark scenario ID | Rejected | Implemented |
 | TC-057 | Aggregate benchmark event limit | More than 100,000 events rejected | Implemented |
 | TC-058 | Invalid benchmark fixture | Entire benchmark fails visibly | Implemented |
-| TC-059 | Versioned benchmark v1 fixture set | Seven labelled scenarios replay reproducibly | Implemented |\n| TC-060 | Impossible calendar date | Reject invalid day/month and leap-year combinations | Implemented |\n| TC-061 | Invalid clock/offset | Reject out-of-range hour, minute, second and timezone offset | Implemented |\n| TC-062 | Timestamp normalization integration | Shared strict parser rejects impossible date in events and cases | Implemented |
+| TC-059 | Versioned benchmark v1 fixture set | Seven labelled scenarios replay reproducibly | Implemented |
+| TC-060 | Impossible calendar date | Reject invalid day/month and leap-year combinations | Implemented |
+| TC-061 | Invalid clock/offset | Reject out-of-range hour, minute, second and timezone offset | Implemented |
+| TC-062 | Timestamp normalization integration | Shared strict parser rejects impossible date in events and cases | Implemented |
 | TC-011 | Unauthenticated API request | 401; no data disclosed | Not implemented |
 | TC-012 | Insufficient permission | 403; no state change | Not implemented |
 | TC-013 | Cross-tenant object reference | Denied without disclosure | Not implemented |
