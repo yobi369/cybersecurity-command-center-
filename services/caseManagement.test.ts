@@ -61,6 +61,7 @@ describe('case management domain state machine', () => {
   it('rejects stale versions and malformed audit metadata', () => {
     expect(() => transitionCase(base(), command(analyst, { type: 'triage' }, 0))).toThrow('version conflict');
     expect(() => transitionCase(base(), { ...command(analyst, { type: 'triage' }), occurredAt: 'yesterday' })).toThrow('ISO-8601');
+    expect(() => transitionCase(base(), { ...command(analyst, { type: 'triage' }), occurredAt: '2026-02-31T00:00:00Z' })).toThrow('ISO-8601');
   });
   it('rejects malformed runtime roles, identifiers and reason codes', () => {
     expect(() => transitionCase(base(), command({ ...analyst, role: 'owner' as CaseActor['role'] }, { type: 'triage' }))).toThrow('Invalid actor role');
