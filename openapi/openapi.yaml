@@ -1,0 +1,671 @@
+openapi: 3.1.0
+info:
+  title: Cybersecurity Command Center API
+  version: 0.1.0-draft
+  description: |
+    Draft contract only. No production API is currently deployed. Paths, identity
+    claims, payload limits, pagination, retention, rate limits and source types
+    require approval by the receiving institution before implementation.
+servers:
+  - url: /api
+    description: Relative to an institution-approved deployment host; no production host is configured.
+tags:
+  - name: Health
+    description: Non-sensitive service liveness checks.
+  - name: Events
+    description: Source-authenticated event ingestion and analyst-scoped evidence retrieval.
+  - name: Findings
+    description: Deterministic detection findings and supporting evidence references.
+  - name: Cases
+    description: Analyst and supervisor case lifecycle operations.
+  - name: Audit
+    description: Read-only access to attributable audit records.
+paths:
+  /v1/health/live:
+    get:
+      tags: [Health]
+      operationId: getLiveness
+      summary: Minimal liveness probe
+      security: []
+      description: Returns only process liveness; must not disclose dependency, version, host or configuration details.
+      responses:
+        '200':
+          description: Process is alive.
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                required: [status]
+                properties:
+                  status:
+                    const: alive
+        '503':
+          $ref: '#/components/responses/ServiceUnavailable'
+  /v1/events:
+    post:
+      tags: [Events]
+      operationId: submitEventBatch
+      summary: Submit an authenticated source event batch
+      description: |
+        Production target. The source identity and sourceId must be derived from
+        authenticated transport/credential mapping, never trusted from the body.
+        The service assigns receivedAt and provenance. Batch processing is
+        all-or-nothing: invalid input must not produce a partial accepted batch.
+        Idempotency-Key is scoped to the authenticated source and tenant.
+      security:
+        - SourceMTLS: []
+          SourceBearer: []
+      parameters:
+        - in: header
+          name: Idempotency-Key
+          required: true
+          description: Client-generated key for safe retry; retention window is institution-defined.
+          schema:
+            type: string
+            minLength: 16
+            maxLength: 128
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/EventBatch'
+      responses:
+        '202':
+          description: Batch accepted for asynchronous processing.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BatchAccepted'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '409':
+          description: Idempotency key reused with a different request body.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '413':
+          description: Payload exceeds the institution-approved request limit.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '422':
+          description: Event schema or semantic validation failed.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '503':
+          $ref: '#/components/responses/ServiceUnavailable'
+  /v1/events/{eventId}:
+    get:
+      tags: [Events]
+      operationId: getEvent
+      summary: Retrieve one normalized event
+      description: Event access is tenant-scoped and must be audited. Raw evidence access may require additional case-level authorization.
+      security:
+        - AnalystBearer: []
+      parameters:
+        - $ref: '#/components/parameters/EventId'
+      responses:
+        '200':
+          description: Authorized normalized event.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CanonicalEvent'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+  /v1/findings:
+    get:
+      tags: [Findings]
+      operationId: listFindings
+      summary: List findings visible to the authenticated analyst
+      security:
+        - AnalystBearer: []
+      parameters:
+        - in: query
+          name: severity
+          schema:
+            type: string
+            enum: [critical, high, medium, low, informational]
+        - in: query
+          name: status
+          schema:
+            type: string
+            enum: [new, acknowledged, linked_to_case, dismissed]
+        - in: query
+          name: cursor
+          schema:
+            type: string
+            maxLength: 2048
+        - in: query
+          name: limit
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 25
+      responses:
+        '200':
+          description: Authorized page of findings.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FindingPage'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+  /v1/findings/{findingId}:
+    get:
+      tags: [Findings]
+      operationId: getFinding
+      summary: Retrieve one finding and its evidence references
+      security:
+        - AnalystBearer: []
+      parameters:
+        - $ref: '#/components/parameters/FindingId'
+      responses:
+        '200':
+          description: Finding returned within the caller's tenant and scope.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Finding'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+  /v1/cases:
+    get:
+      tags: [Cases]
+      operationId: listCases
+      summary: List cases visible to the authenticated analyst
+      security:
+        - AnalystBearer: []
+      parameters:
+        - in: query
+          name: status
+          schema:
+            $ref: '#/components/schemas/CaseStatus'
+        - in: query
+          name: cursor
+          schema:
+            type: string
+            maxLength: 2048
+        - in: query
+          name: limit
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 25
+      responses:
+        '200':
+          description: Authorized page of cases.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CasePage'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+    post:
+      tags: [Cases]
+      operationId: createCase
+      summary: Create a case linked to an existing finding
+      security:
+        - AnalystBearer: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required: [findingId, title]
+              properties:
+                findingId:
+                  type: string
+                  minLength: 1
+                  maxLength: 128
+                title:
+                  type: string
+                  minLength: 5
+                  maxLength: 160
+      responses:
+        '201':
+          description: Case created and audited.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CaseRecord'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+  /v1/cases/{caseId}:
+    get:
+      tags: [Cases]
+      operationId: getCase
+      summary: Retrieve a case visible to the authenticated analyst
+      security:
+        - AnalystBearer: []
+      parameters:
+        - $ref: '#/components/parameters/CaseId'
+      responses:
+        '200':
+          description: Authorized case record.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CaseRecord'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+  /v1/cases/{caseId}/transitions:
+    post:
+      tags: [Cases]
+      operationId: transitionCase
+      summary: Apply an authorized case state transition
+      description: |
+        Actor identity and role are derived server-side from a verified session.
+        Client-supplied role, tenantId, actorId, audit fields or target status are
+        never trusted. expectedVersion provides optimistic concurrency control.
+      security:
+        - AnalystBearer: []
+      parameters:
+        - $ref: '#/components/parameters/CaseId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CaseTransitionRequest'
+      responses:
+        '200':
+          description: Transition applied; audit event persisted atomically.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CaseTransitionResult'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          description: Stale case version or invalid transition for current state.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+  /v1/audit/events:
+    get:
+      tags: [Audit]
+      operationId: listAuditEvents
+      summary: Read authorized audit records
+      description: Read-only auditor access; all access to audit records is itself audited.
+      security:
+        - AuditorBearer: []
+      parameters:
+        - in: query
+          name: caseId
+          schema:
+            type: string
+            maxLength: 128
+        - in: query
+          name: cursor
+          schema:
+            type: string
+            maxLength: 2048
+        - in: query
+          name: limit
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 25
+      responses:
+        '200':
+          description: Authorized audit event page.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuditPage'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+components:
+  securitySchemes:
+    AnalystBearer:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: Institution-issued token; issuer, audience, expiry, session and role claims must be validated server-side.
+    AuditorBearer:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: Institution-issued auditor token with server-enforced read-only scope.
+    SourceBearer:
+      type: http
+      scheme: bearer
+      bearerFormat: opaque
+      description: Source-specific credential mapped to a registered source identity.
+    SourceMTLS:
+      type: mutualTLS
+      description: Client certificate validated against institution-approved trust anchors and source registry.
+  parameters:
+    EventId:
+      in: path
+      name: eventId
+      required: true
+      schema:
+        type: string
+        minLength: 1
+        maxLength: 80
+    FindingId:
+      in: path
+      name: findingId
+      required: true
+      schema:
+        type: string
+        minLength: 1
+        maxLength: 128
+    CaseId:
+      in: path
+      name: caseId
+      required: true
+      schema:
+        type: string
+        minLength: 1
+        maxLength: 128
+  responses:
+    BadRequest:
+      description: Request validation failed; response contains a safe reason code.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    Unauthorized:
+      description: Authentication is missing, invalid, expired or revoked.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    Forbidden:
+      description: Authenticated principal lacks required tenant, resource or action scope.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    NotFound:
+      description: Resource does not exist or is not visible within caller scope.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    RateLimited:
+      description: Institution-approved rate limit exceeded.
+      headers:
+        Retry-After:
+          schema:
+            type: integer
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    ServiceUnavailable:
+      description: Service unavailable; no internal dependency detail is disclosed.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+  schemas:
+    EventBatch:
+      type: object
+      additionalProperties: false
+      required: [schemaVersion, events]
+      properties:
+        schemaVersion:
+          const: '1.0.0'
+        events:
+          type: array
+          minItems: 1
+          maxItems: 10000
+          items:
+            $ref: '#/components/schemas/SourceEvent'
+    SourceEvent:
+      type: object
+      additionalProperties: false
+      required: [eventId, observedAt, eventType]
+      properties:
+        eventId:
+          type: string
+          pattern: '^[a-zA-Z0-9][a-zA-Z0-9._:-]{0,79}$'
+        observedAt:
+          type: string
+          format: date-time
+          description: Source-observed event time with explicit timezone.
+        eventType:
+          type: string
+          enum: [authentication.failure, authentication.success]
+        attributes:
+          type: object
+          maxProperties: 32
+          additionalProperties:
+            oneOf:
+              - type: string
+                maxLength: 512
+              - type: number
+              - type: boolean
+    CanonicalEvent:
+      type: object
+      additionalProperties: false
+      required: [eventId, observedAt, receivedAt, sourceId, schemaVersion, eventType, simulation]
+      properties:
+        eventId:
+          type: string
+        observedAt:
+          type: string
+          format: date-time
+        receivedAt:
+          type: string
+          format: date-time
+          readOnly: true
+        sourceId:
+          type: string
+          readOnly: true
+        schemaVersion:
+          const: '1.0.0'
+        eventType:
+          type: string
+          enum: [authentication.failure, authentication.success]
+        simulation:
+          type: boolean
+          readOnly: true
+        attributes:
+          type: object
+          maxProperties: 32
+          additionalProperties:
+            oneOf:
+              - type: string
+                maxLength: 512
+              - type: number
+              - type: boolean
+    BatchAccepted:
+      type: object
+      additionalProperties: false
+      required: [batchId, acceptedCount, status]
+      properties:
+        batchId:
+          type: string
+        acceptedCount:
+          type: integer
+          minimum: 1
+        status:
+          const: accepted
+    Finding:
+      type: object
+      additionalProperties: false
+      required: [findingId, detectorId, ruleVersion, severity, sourceId, evidenceEventIds, simulation]
+      properties:
+        findingId:
+          type: string
+        detectorId:
+          type: string
+        ruleVersion:
+          type: string
+        severity:
+          type: string
+          enum: [critical, high, medium, low, informational]
+        sourceId:
+          type: string
+        evidenceEventIds:
+          type: array
+          minItems: 1
+          items:
+            type: string
+        simulation:
+          type: boolean
+        summary:
+          type: string
+          maxLength: 2000
+    CaseStatus:
+      type: string
+      enum: [new, triaged, in_progress, escalated, pending_information, resolved, closed]
+    CaseRecord:
+      type: object
+      additionalProperties: false
+      required: [caseId, title, status, version, createdAt, updatedAt]
+      properties:
+        caseId:
+          type: string
+        title:
+          type: string
+          minLength: 5
+          maxLength: 160
+        status:
+          $ref: '#/components/schemas/CaseStatus'
+        assignedTo:
+          type: string
+        version:
+          type: integer
+          minimum: 1
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+    CaseTransitionRequest:
+      type: object
+      additionalProperties: false
+      required: [action, expectedVersion]
+      properties:
+        action:
+          type: string
+          enum: [triage, start, escalate, request_information, resume, resolve, close, reopen, assign]
+        expectedVersion:
+          type: integer
+          minimum: 1
+        reasonCode:
+          type: string
+          maxLength: 64
+        assigneeId:
+          type: string
+          maxLength: 80
+    CaseTransitionResult:
+      type: object
+      additionalProperties: false
+      required: [caseRecord, auditEvent]
+      properties:
+        caseRecord:
+          $ref: '#/components/schemas/CaseRecord'
+        auditEvent:
+          $ref: '#/components/schemas/AuditEvent'
+    AuditEvent:
+      type: object
+      additionalProperties: false
+      required: [auditEventId, caseId, actorId, action, fromStatus, toStatus, occurredAt]
+      properties:
+        auditEventId:
+          type: string
+        caseId:
+          type: string
+        actorId:
+          type: string
+        action:
+          type: string
+        fromStatus:
+          $ref: '#/components/schemas/CaseStatus'
+        toStatus:
+          $ref: '#/components/schemas/CaseStatus'
+        reasonCode:
+          type: string
+        occurredAt:
+          type: string
+          format: date-time
+    FindingPage:
+      $ref: '#/components/schemas/Page'
+    CasePage:
+      $ref: '#/components/schemas/Page'
+    AuditPage:
+      $ref: '#/components/schemas/Page'
+    Page:
+      type: object
+      additionalProperties: false
+      required: [items]
+      properties:
+        items:
+          type: array
+          items:
+            oneOf:
+              - $ref: '#/components/schemas/Finding'
+              - $ref: '#/components/schemas/CaseRecord'
+              - $ref: '#/components/schemas/AuditEvent'
+        nextCursor:
+          type: string
+    Error:
+      type: object
+      additionalProperties: false
+      required: [code, message, requestId]
+      properties:
+        code:
+          type: string
+          maxLength: 64
+        message:
+          type: string
+          maxLength: 512
+        requestId:
+          type: string
+          maxLength: 128

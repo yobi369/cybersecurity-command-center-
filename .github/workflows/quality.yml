@@ -1,0 +1,55 @@
+name: Quality Gates
+
+on:
+  push:
+    branches: [main, "research/**"]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: quality-${{ github.workflow }}-${{ github.ref }}-${{ github.event_name }}
+  cancel-in-progress: true
+
+jobs:
+  quality:
+    name: Test, typecheck and production build
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Check out source
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - name: Set up Node.js
+        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: 22
+          package-manager-cache: true
+      - name: Install dependencies
+        run: npm ci --no-audit --no-fund
+      - name: Dependency tree verification
+        run: npm ls --depth=0
+      - name: Dependency vulnerability audit
+        run: npm audit --audit-level=high
+      - name: Validate OpenAPI contract
+        run: npm run openapi:lint
+      - name: Generate CycloneDX software bill of materials
+        run: npm sbom --sbom-format cyclonedx --output-file sbom.json
+      - name: Unit tests
+        run: npm run test:coverage
+      - name: TypeScript validation
+        run: npm run typecheck
+      - name: Production build
+        run: npm run build
+      - name: Preserve coverage evidence
+        if: always()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: verification-evidence-${{ github.sha }}
+          path: |
+            coverage/
+            sbom.json
+          if-no-files-found: warn
+          retention-days: 30
