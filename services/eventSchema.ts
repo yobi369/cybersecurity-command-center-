@@ -24,10 +24,9 @@ function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === 'object' && value !== null && !Array.isArray(value);
 }
 function validateTimestamp(value: unknown, field: string): string {
-  if (typeof value !== 'string' || !ISO_WITH_TIMEZONE.test(value) || !Number.isFinite(Date.parse(value))) {
-    throw new Error(field + ' must be a valid ISO-8601 timestamp with an explicit timezone.');
-  }
-  return new Date(Date.parse(value)).toISOString();
+  const normalized = normalizeIsoTimestamp(value);
+  if (!normalized) throw new Error(field + ' must be a valid ISO-8601 timestamp with an explicit timezone.');
+  return normalized;
 }
 /** Validate and normalize an untrusted JSON-like fixture into canonical event v1.0.0. */
 export function parseCanonicalEvent(input: unknown): CanonicalSecurityEvent {
