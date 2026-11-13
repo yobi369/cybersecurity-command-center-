@@ -9,17 +9,15 @@ export const DETECTION_RULE_SET_VERSION = '1.0.0' as const;
 const FAILURE_THRESHOLD = 5;
 const WINDOW_MS = 10 * 60 * 1000;
 const ID_PATTERN = /^[a-zA-Z0-9][a-zA-Z0-9._:-]{0,79}$/;
-const ISO_WITH_TIMEZONE = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d{1,3})?(?:Z|[+-]\d{2}:\d{2})$/;
 function validateEvent(event: SecurityEvent): number {
   if (!event || typeof event !== 'object' || Array.isArray(event)) throw new Error('Each event must be an object.');
   if (typeof event.eventId !== 'string' || !ID_PATTERN.test(event.eventId)) throw new Error('eventId has an invalid format.');
   if (typeof event.sourceId !== 'string' || !ID_PATTERN.test(event.sourceId)) throw new Error('sourceId has an invalid format.');
   if (event.simulation !== true) throw new Error('This research-stage detector accepts synthetic events only.');
   if (event.eventType !== 'authentication.failure' && event.eventType !== 'authentication.success') throw new Error('Unsupported eventType.');
-  if (typeof event.observedAt !== 'string' || !ISO_WITH_TIMEZONE.test(event.observedAt)) throw new Error('observedAt must be an ISO-8601 timestamp with an explicit timezone.');
-  const timestamp = Date.parse(event.observedAt);
-  if (!Number.isFinite(timestamp)) throw new Error('observedAt must be a valid ISO-8601 timestamp.');
-  return timestamp;
+  const normalizedTimestamp = normalizeIsoTimestamp(event.observedAt);
+  if (!normalizedTimestamp) throw new Error('observedAt must be a valid ISO-8601 timestamp with an explicit timezone.');
+  return Date.parse(normalizedTimestamp);
 }
 /** Detect five or more failures from one synthetic source in a rolling ten-minute window. */
 export function detectAuthenticationFailureBursts(events: readonly SecurityEvent[]): DetectionResult {
